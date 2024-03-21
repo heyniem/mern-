@@ -42,7 +42,9 @@ var userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product"
     }],
-    refreshToken
+    refreshToken: {
+        type: String,
+    }
 },
 {
     timestamps: true

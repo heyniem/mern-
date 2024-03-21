@@ -1,6 +1,7 @@
 const { generateToken } = require('../config/jwToken');
 const User = require('../models/userModel')
-
+const {vaidateMongoDb} = require("../utilities/validateMongoDb")
+const {refreshToken} = require('../config/jwRefreshToken');
 const asyncHandler = require('express-async-handler')
 
 const createUser = asyncHandler(
@@ -29,6 +30,14 @@ const loginUserCtrl = asyncHandler (async (req,res) => {
     const {email, password} = req.body;
     const findUser = await User.findOne ({email});
     if (findUser && (await findUser.isPasswordMatched(password))) {
+        const refreshToken = await refreshToken(findUser?.id);
+        const updateUser = await User.findByIdAndUpdate(findUser.id,{
+            refreshToken: refreshToken
+        },{new:true});
+        res.cookie('refreshToken',refreshToken,{
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000,
+        })
         res.json({
             id: findUser?._id,
             firstname: findUser?.firstname,
@@ -57,6 +66,7 @@ const getAllUser = asyncHandler(
 const getUser = asyncHandler (
     async (req,res) => {
         const {id} = req.params;
+        vaidateMongoDb(id)
         try {
             const getaUser = await User.findById(id);
             res.json({
@@ -72,6 +82,7 @@ const getUser = asyncHandler (
 const deleteUser = asyncHandler (
     async (req,res) => {
         const {id} = req.params;
+        vaidateMongoDb(id)
         try {
             const deleteUser = await User.findByIdAndDelete(id);
             res.json({
@@ -87,6 +98,8 @@ const deleteUser = asyncHandler (
 const updateUser = asyncHandler (
     async (req,res) => {
         const {id} = req.params;
+        vaidateMongoDb(id)
+        User.validate
         console.log(req.headers)
         try {
             const updateUser = await User.findByIdAndUpdate(
