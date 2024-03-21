@@ -34,10 +34,15 @@ var userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Address"
     }],
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
     wishlist: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product"
-    }]
+    }],
+    refreshToken
 },
 {
     timestamps: true
